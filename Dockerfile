@@ -13,7 +13,7 @@ RUN pip install --upgrade pip ;\
     pip --no-cache-dir install numpy==1.12.1 scipy==0.19.0 pandas==0.19.2 matplotlib==2.0.1 hep_ml==0.4.0 scikit-learn==0.18.1 jupyter joblib==0.11 nose tables
 
 VOLUME ["/notebooks"]
-EXPOSE 8888
+EXPOSE 8890
 CMD ["/bin/bash", "--login", "-c", "cd /notebooks && jupyter-notebook --allow-root --ip=* --port=8890 --NotebookApp.token="]
 
 # running

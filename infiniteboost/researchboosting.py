@@ -1,7 +1,11 @@
 from __future__ import print_function, division, absolute_import
-import numpy
+
 import copy
-from hep_ml.gradientboosting import BaseEstimator, check_random_state, check_xyw
+
+import numpy
+from sklearn.base import BaseEstimator
+from sklearn.utils import check_random_state
+
 from .researchlosses import LambdaLossNDCG
 from .researchtree import ResearchDecisionTree
 
@@ -87,14 +91,15 @@ class ResearchGradientBoostingBase(BaseEstimator):
         self._check_params()
         n_samples = len(X)
 
-        self.estimators = []
-
-        # preparing for loss function
-        X, y, sample_weight = check_xyw(X, y, sample_weight=sample_weight)
+        # checking arguments for loss function
+        if sample_weight is None:
+            sample_weight = numpy.ones(len(y), dtype='float')
+        assert len(X) == len(y) == len(sample_weight)
 
         self.loss = copy.deepcopy(self.loss)
         self.loss.fit(X, y, sample_weight=sample_weight)
 
+        self.estimators = []
         self.n_features = X.shape[1]
 
         self.initial_step = self.compute_initial_step(n_samples)
