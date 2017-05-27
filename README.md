@@ -11,7 +11,25 @@ InfiniteBoost is an approach to building ensembles which combines best sides of 
 Trees in the ensemble encounter mistakes done by previous trees, but due to modified scheme of encountering contributions
 the ensemble converges to the limit, thus avoiding overfitting, just as random forest.
 
+## To reproduce research
+
+Research is performed in jupyter notebooks 
+([why Jupyter notebooks are awesome](http://arogozhnikov.github.io/2016/09/10/jupyter-features.html)).
+
+You can use docker image `arogozhnikov/pmle:0.01` from docker hub. 
+Dockerfile is stored in this repository and uses .
+
+To run the environment:
+```bash
+sudo docker run -it --rm -v /YourMountedDirectory:/notebooks -p 8890:8890 arogozhnikov/pmle:0.01
+```
+(and open `localhost:8890` in the browser).
+
+
 ## InfiniteBoost package
 
+Self-written minimalistic implementation of trees as used for experiments against boosting.
 
-(code written in python 2 and some functions in fortran)
+Specific implementation was used to compare with random forest and based on the trees from scikit-learn package. 
+
+(code written in python 2, some critical functions in fortran, so you need `gfortran + openmp` installed before).
