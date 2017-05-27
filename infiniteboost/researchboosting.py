@@ -13,7 +13,7 @@ __author__ = 'Alex Rogozhnikov, Tatiana Likhomanenko'
 
 
 class ResearchGradientBoostingBase(BaseEstimator):
-    """ 
+    """
     Base class for gradient boosting estimators. 
     Implements canonical gradient boosting. 
     """
@@ -79,7 +79,7 @@ class ResearchGradientBoostingBase(BaseEstimator):
         return current_sum + self.learning_rate * contribution
 
     def compute_initial_step(self, n_samples):
-        """compute initial approximationdd"""
+        """compute initial approximation"""
         initial_step = 0
         for _ in range(10):
             pred = numpy.zeros(n_samples) + initial_step
@@ -88,6 +88,12 @@ class ResearchGradientBoostingBase(BaseEstimator):
         return initial_step
 
     def fit(self, X, y, sample_weight=None):
+        """
+        Train a model
+        :param X: important! X should be already after BinTransform! That is, uint8 and fortran-ordered 
+        :param y: target values, 0 and 1 for classification, 
+        :param sample_weight: real-valued weights for observations 
+        """
         self._check_params()
         n_samples = len(X)
 
@@ -184,11 +190,8 @@ class InfiniteBoosting(ResearchGradientBoostingBase):
         F(x) \gets capacity \times\varepsilon_m\times\text{tree}_m(x) + (1-\varepsilon_m)F(x), where
         \varepsilon_m = \frac{\alpha_m}{\sum_{k=1}^m \alpha_k}, alpha_k = k
         """
-        prev_normalisation = (iteration + 0) * (iteration + 1) / 2.
-        next_normalisation = (iteration + 2) * (iteration + 1) / 2.
-
-        return (current_sum * prev_normalisation +
-                min(self.capacity * (iteration + 1), next_normalisation) * contribution) / next_normalisation
+        epsilon = 2. / (iteration + 2)
+        return current_sum * (1 - epsilon) + min(epsilon * self.capacity, 1) * contribution
 
 
 class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
@@ -212,13 +215,13 @@ class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
 
     def encounter_contribution(self, current_sum, contribution, iteration, n_iterations,
                                is_training=None, bootstrap_weights=None):
-        """function to be modified to experiment with different algorithms """
+        """ Function handles both encountering contributions and correcting capacity  """
         if is_training and (iteration == 0):
             self.capacities = [0.5]
         if iteration == 0:
             self.all_contributions = numpy.zeros(len(contribution), dtype='float64')
 
-        # \sum_i i * tree_i / \sum_i i * capacity
+        # \sum_i (i * tree_i) / (\sum_i i) * capacity
         next_normalisation = (iteration + 2) * (iteration + 1) / 2.
         self.all_contributions += (iteration + 1) * contribution
         current_predictions = self.all_contributions * (self.capacities[iteration] / next_normalisation)
@@ -230,8 +233,5 @@ class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
 
             new_capacity = self.capacities[-1] * ((iteration + 2) / (iteration + 1.)) ** total_sign
             self.capacities.append(new_capacity)
-
-            if iteration % 100 == 0:
-                print(self.capacities[-1], end=', ')
 
         return current_predictions
