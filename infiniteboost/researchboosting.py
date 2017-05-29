@@ -90,7 +90,7 @@ class ResearchGradientBoostingBase(BaseEstimator):
     def fit(self, X, y, sample_weight=None):
         """
         Train a model
-        :param X: important! X should be already after BinTransform! That is, uint8 and fortran-ordered 
+        :param X: important! X should be already preprocessed with BinTransform! That is, uint8 and fortran-ordered 
         :param y: target values, 0 and 1 for classification, 
         :param sample_weight: real-valued weights for observations 
         """
@@ -227,13 +227,13 @@ class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
         # \sum_i (i * tree_i) / (\sum_i i) * capacity
         next_normalisation = (iteration + 2) * (iteration + 1) / 2.
         self.all_contributions += (iteration + 1) * contribution
-        current_predictions = self.initial_step + \
-                              self.all_contributions * (self.capacities[iteration] / next_normalisation)
+        not_shifted_predictions = self.all_contributions * (self.capacities[iteration] / next_normalisation)
+        current_predictions = self.initial_step + not_shifted_predictions
 
         if is_training:
             # correcting capacity for the next step
             target, weights = self.loss.prepare_tree_params(current_predictions)
-            total_sign = numpy.sign(numpy.sum(target * weights * current_predictions * self.is_holdout))
+            total_sign = numpy.sign(numpy.sum(target * weights * not_shifted_predictions * self.is_holdout))
 
             new_capacity = self.capacities[-1] * ((iteration + 2) / (iteration + 1.)) ** total_sign
             self.capacities.append(new_capacity)
