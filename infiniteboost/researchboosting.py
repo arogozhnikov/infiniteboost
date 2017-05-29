@@ -191,7 +191,10 @@ class InfiniteBoosting(ResearchGradientBoostingBase):
         \varepsilon_m = \frac{\alpha_m}{\sum_{k=1}^m \alpha_k}, alpha_k = k
         """
         epsilon = 2. / (iteration + 2)
-        return current_sum * (1 - epsilon) + min(epsilon * self.capacity, 1) * contribution
+        result = current_sum * (1 - epsilon) + min(epsilon * self.capacity, 1) * contribution
+        # compensating decay of initial step
+        result += epsilon * self.initial_step
+        return result
 
 
 class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
@@ -224,7 +227,8 @@ class InfiniteBoostingWithHoldout(ResearchGradientBoostingBase):
         # \sum_i (i * tree_i) / (\sum_i i) * capacity
         next_normalisation = (iteration + 2) * (iteration + 1) / 2.
         self.all_contributions += (iteration + 1) * contribution
-        current_predictions = self.all_contributions * (self.capacities[iteration] / next_normalisation)
+        current_predictions = self.initial_step + \
+                              self.all_contributions * (self.capacities[iteration] / next_normalisation)
 
         if is_training:
             # correcting capacity for the next step
