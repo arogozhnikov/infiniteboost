@@ -34,6 +34,7 @@ class LogisticLoss(object):
     """
 
     def fit(self, X, y, sample_weight=None):
+        assert numpy.all(numpy.in1d(y, [0, 1]))
         self.y_signed = 2 * y - 1
         self.sample_weight = sample_weight
         return self
@@ -133,7 +134,7 @@ def compute_lambdas_numpy(n_docs, qid_indices, scores,
         lambdas = s_ij * numpy.abs(gains_diff * discount_diff * sigmoids)
 
         gradients[left:right] = lambdas.sum(axis=1)
-        # that's what lightGBM and XGBoost do
+        # that's how lightGBM and XGBoost approximate hessian
         hessians[left:right] = numpy.abs(lambdas * (1. - sigmoids)).sum(axis=1)
 
     return gradients, hessians

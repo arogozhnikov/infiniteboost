@@ -36,7 +36,7 @@ setup(
     ext_modules=[Extension(name='infiniteboost.fortranfunctions',
                            sources=['infiniteboost/fortranfunctions.f90'],
                            extra_link_args=["-lgomp"],
-                           extra_f90_compile_args=["-fopenmp -O3 -march=native"])],
+                           extra_f90_compile_args=["-fopenmp -O3"])],
 
     # List run-time dependencies here. These will be installed by pip when your project is installed.
     install_requires=[

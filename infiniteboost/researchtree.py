@@ -147,7 +147,7 @@ class BinTransformer(BaseEstimator, TransformerMixin):
         :return: self
         """
         assert self.max_bins < 255, 'Too high number of bins!'
-        assert self.max_bins <= ResearchDecisionTree._n_thresholds, 'Too small number of bins!'
+        assert self.max_bins <= ResearchDecisionTree._n_thresholds, 'Too high number of bins for a tree!'
         X = numpy.require(X, dtype='float32')
         self.percentiles_ = []
         for column in range(X.shape[1]):

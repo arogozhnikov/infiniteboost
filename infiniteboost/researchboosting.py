@@ -80,7 +80,7 @@ class ResearchGradientBoostingBase(BaseEstimator):
 
     def compute_initial_step(self, n_samples):
         """compute initial approximation"""
-        initial_step = 0
+        initial_step = 0.
         for _ in range(10):
             pred = numpy.zeros(n_samples) + initial_step
             target, weight = self.loss.prepare_tree_params(pred)
@@ -180,7 +180,7 @@ class InfiniteBoosting(ResearchGradientBoostingBase):
     def __init__(self, capacity=100., **kargs):
         self.capacity = capacity
         if 'learning_rate' in kargs:
-            print('warning: learning rate is ignored in forest regressor')
+            print('warning: learning rate is ignored in InfiniteBoosting')
         ResearchGradientBoostingBase.__init__(self, **kargs)
 
     def encounter_contribution(self, current_sum, contribution, iteration, n_iterations,
