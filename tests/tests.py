@@ -6,8 +6,8 @@ from sklearn.metrics import roc_auc_score
 from itertools import combinations_with_replacement
 
 from infiniteboost.researchboosting import ResearchGradientBoostingBase, InfiniteBoosting, InfiniteBoostingWithHoldout
-from infiniteboost.researchlosses import MSELoss, compute_lambdas_numpy
-from infiniteboost.researchtree import BinTransformer, build_decision_numpy
+from infiniteboost.researchlosses import MSELoss, LogisticLoss, LambdaLossNDCG, compute_lambdas_numpy, compute_lambdas
+from infiniteboost.researchtree import BinTransformer, build_decision_numpy, build_decision
 from infiniteboost.fortranfunctions import fortranfunctions
 
 
@@ -21,15 +21,21 @@ def test_gb_simple():
     assert roc_auc_score(y, reg.decision_function(X)) > 0.6
 
 
-def test_reprodicibility():
+def test_reproducibility():
     X, y = generate_sample(n_samples=10000, n_features=10)
     X = BinTransformer().fit_transform(X)
+    qids = numpy.sort(numpy.random.randint(0, 100, size=len(X)))
 
-    for model1, model2 in combinations_with_replacement(
-            [ResearchGradientBoostingBase, InfiniteBoosting, InfiniteBoostingWithHoldout], r=2):
-        reg1 = model1(loss=MSELoss(), random_state=25).fit(X, y)
-        reg2 = model2(loss=MSELoss(), random_state=25).fit(X, y)
-        assert numpy.allclose(reg1.decision_function(X), reg2.decision_function(X)) == (model1 == model2)
+    for loss, target in ([MSELoss(), X.sum(axis=1)],
+                         [LogisticLoss(), y],
+                         [LambdaLossNDCG(qid_feature=qids, n_threads=2), y * 2]
+                         ):
+        for model1, model2 in combinations_with_replacement(
+                [ResearchGradientBoostingBase, InfiniteBoosting, InfiniteBoostingWithHoldout], r=2):
+            reg1 = model1(loss=loss, n_estimators=30, random_state=25).fit(X, target)
+            reg2 = model2(loss=loss, n_estimators=30, random_state=25).fit(X, target)
+            assert numpy.allclose(reg1.decision_function(X), reg2.decision_function(X)) == (model1 == model2), \
+                ('loss', loss)
 
 
 def test_fortran_improvements(n_samples=10000, n_features=10):
@@ -60,9 +66,11 @@ def test_fortran_improvements(n_samples=10000, n_features=10):
                 n_thresh=n_thresh, reg=reg, use_friedman_mse=use_friedman, n_threads=n_threads)
 
     assert numpy.allclose(improvements1, improvements2)
+    assert build_decision != build_decision_numpy
+    assert build_decision == fortranfunctions.build_decision_fortran
 
 
-def test_fortran_lambdas(n_documents=100, n_queries=10):
+def test_fortran_lambdas(n_documents=500, n_queries=100):
     """ test may fail due to the single/double precision difference """
     qids = numpy.sort(numpy.random.randint(0, n_queries, size=n_documents))
     _, qid_index = numpy.unique(qids, return_index=True)
@@ -71,12 +79,21 @@ def test_fortran_lambdas(n_documents=100, n_queries=10):
     scores = numpy.random.normal(size=n_documents)
     normalized_gains = numpy.random.normal(size=n_documents)
 
-    grad1, hess1 = compute_lambdas_numpy(
-        n_docs=n_documents, qid_indices=qid_index, scores=scores,
-        normalized_gains=normalized_gains, n_threads=1, orders=orders)
+    for n_threads in [1, 2, 3]:
+        print(n_threads)
+        grad1, hess1 = compute_lambdas_numpy(
+                n_docs=n_documents, qid_indices=qid_index, scores=scores,
+                normalized_gains=normalized_gains, n_threads=1, orders=orders)
 
-    grad2, hess2 = fortranfunctions.compute_lambdas_fortran(
-        n_docs=n_documents, qid_indices=qid_index, scores=scores,
-        normalized_gains=normalized_gains, n_threads=1, orders=orders)
-    assert numpy.allclose(grad1, grad2)
-    assert numpy.allclose(hess1, hess2)
+        grad2, hess2 = fortranfunctions.compute_lambdas_fortran(
+            n_docs=n_documents, qid_indices=qid_index, scores=scores,
+            normalized_gains=normalized_gains, n_threads=n_threads, orders=orders)
+
+        grad3, hess3 = fortranfunctions.compute_lambdas_fortran(
+            n_docs=n_documents, qid_indices=qid_index, scores=scores,
+            normalized_gains=normalized_gains, n_threads=1, orders=orders)
+        assert numpy.all(grad2 == grad3) and numpy.all(hess2 == hess3)
+        assert numpy.allclose(grad1, grad2), [(grad1 - grad2).__abs__().max(), grad1.max()]
+        assert numpy.allclose(hess1, hess2)
+    assert compute_lambdas != compute_lambdas_numpy
+    assert compute_lambdas == fortranfunctions.compute_lambdas_fortran
