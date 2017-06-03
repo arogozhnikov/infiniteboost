@@ -1,7 +1,7 @@
 """
 This module provides loss definitions used during boosting training.
 All losses are prepared as classes with two mandatory functions: 
-- `fit` saves necessary information from training set, for example, sample weights and targets
+- `fit` saves necessary information from the training set, for example, sample weights and targets
 - `prepare_tree_params` prepares target and sample weights for new tree construction during boosting procedure 
 """
 from __future__ import print_function, division, absolute_import
@@ -19,11 +19,25 @@ class MSELoss(object):
     """
 
     def fit(self, X, y, sample_weight=None):
+        """
+        Fit the metric 
+        
+        :param X: data, numpy.array with size [n_samples, n_features] 
+        :param y: target, numpy.array with size [n_samples]
+        :param sample_weight: sample weights, numpy.array with size [n_samples]
+        :return: self 
+        """
         self.y = y
         self.sample_weight = sample_weight
         return self
 
     def prepare_tree_params(self, pred):
+        """
+        Compute gradients and hessians 
+
+        :param pred: numpy.array with size [n_samples], predictions for each sample 
+        :return: negative gradient / hessian, hessian
+        """
         return self.y - pred, self.sample_weight
 
 
@@ -34,12 +48,26 @@ class LogisticLoss(object):
     """
 
     def fit(self, X, y, sample_weight=None):
+        """
+        Fit the metric 
+
+        :param X: data, numpy.array with size [n_samples, n_features] 
+        :param y: target, numpy.array with size [n_samples]
+        :param sample_weight: sample weights, numpy.array with size [n_samples]
+        :return: self 
+        """
         assert numpy.all(numpy.in1d(y, [0, 1]))
         self.y_signed = 2 * y - 1
         self.sample_weight = sample_weight
         return self
 
     def prepare_tree_params(self, pred):
+        """
+        Compute gradients and hessians 
+        
+        :param pred: numpy.array with size [n_samples], predictions for each sample 
+        :return: negative gradient / hessian, hessian
+        """
         tanhs = numpy.tanh(pred)
         ngradients = self.y_signed - tanhs
         hessians = 1 - tanhs ** 2
@@ -57,7 +85,7 @@ def optimal_dcg(gains):
 
 class LambdaLossNDCG(object):
     """
-    Lambda loss and its gradient for NDCG measure 
+    Lambda loss and its gradient for nDCG (normalized Discounted Cumulative Gain) measure 
     reproduced according to the paper 
     Burges, C. J. (2010). From ranknet to lambdarank to lambdamart: An overview. Learning, 11(23-581), 81.
     """
@@ -67,6 +95,15 @@ class LambdaLossNDCG(object):
         self.n_threads = n_threads
 
     def fit(self, X, y, sample_weight=None):
+        """
+        Fit the metric 
+
+        :param X: data, numpy.array with size [n_samples, n_features] 
+        :param y: target, numpy.array with size [n_samples]
+        :param sample_weight: sample weights, numpy.array with size [n_samples]
+        :return: self 
+        """
+
         if isinstance(self.qid_feature, str):
             qids = numpy.asarray(X[self.qid_feature])
         else:
@@ -80,7 +117,7 @@ class LambdaLossNDCG(object):
         # to get the access to the documents with the same query id
         self.qid_index = numpy.insert(self.qid_index, len(self.qid_index),
                                       len(qids)).astype('int32')
-        # compute 2^relevance - 1 / IDCG(query) for each document
+        # compute (2^relevance - 1) / IDCG(query) for each document
         # (to use it later for NDCG computing)
         self.normalized_gains = numpy.array(2 ** y - 1., dtype='float32')
 
@@ -95,7 +132,12 @@ class LambdaLossNDCG(object):
         return self
 
     def prepare_tree_params(self, pred):
-        # compute lambda gradients
+        """
+        Compute lambda gradients and hessians 
+
+        :param pred: numpy.array with size [n_samples], predictions for each sample 
+        :return: negative gradient / hessian, hessian
+        """
         gradients, hessians = compute_lambdas(
             n_docs=len(pred),
             qid_indices=self.qid_index,
@@ -147,7 +189,6 @@ class NDCG_metric(object):
     """
     nDCG (normalized Discounted Cumulative Gain) measure for ranking
     """
-
     def __init__(self, queries, relevances, maximal=100000):
         self.queries = queries
         self.relevances = relevances
