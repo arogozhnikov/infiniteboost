@@ -1,6 +1,6 @@
 # InfiniteBoost
 
-Reseach code for a paper:  <br />
+Code for a paper  <br />
 InfiniteBoost: building infinite ensembles with gradient descent.
 [TODO LINK to a paper](TODO link to a paper)
 
