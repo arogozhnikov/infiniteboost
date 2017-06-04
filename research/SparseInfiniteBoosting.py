@@ -1,5 +1,6 @@
 """
-Modification to work with sklearn trees - those can be deep and support sparse data. 
+For clear comparison InfiniteBoost and random forest the modification of InfiniteBoost is prepared 
+to work with sklearn trees - those can be deep and support sparse data. 
 """
 from __future__ import print_function, division, absolute_import
 
@@ -9,14 +10,21 @@ from sklearn.tree import DecisionTreeRegressor
 
 
 class InfiniteBoosting(BaseEstimator, ClassifierMixin):
-    """ Infinite Boosting that supports sparse data (uses sklearn trees) """
-
     def __init__(self, capacity=1., n_estimators=10, max_leaf_nodes=None):
+        """
+        Infinite boosting classifier with fixed capacity value during iterations.
+        It supports sparse data (uses sklearn trees).
+    
+        :param float capacity: capacity of infinite boosting, normalization constant of the ensemble 
+        :param int n_estimators: number of estimators in the ensemble 
+        :param int max_leaf_nodes: maximal number of leaves in each tree 
+        """
         self.n_estimators = n_estimators
         self.capacity = float(capacity)
         self.max_leaf_nodes = max_leaf_nodes
 
     def encounter_contribution(self, current_sum, contribution, iteration):
+        """ Add tree contribution to the ensemble """
         epsilon = 2. / (iteration + 2)
         return current_sum * (1 - epsilon) + contribution * epsilon
 
@@ -34,9 +42,9 @@ class InfiniteBoosting(BaseEstimator, ClassifierMixin):
         self.estimators = []
 
         for iteration in range(self.n_estimators):
+            # using AdaLoss -> target = +-1, weights below,
+            # result is well-aligned with RF behavior when capacity is zero
             ada_weight = numpy.exp(- y_signed * pred * self.compute_capacity(iteration))
-            # using AdaLoss -> target = +-1, weights below, result is well-aligned with RF behavior
-            # when capacity is zero
 
             _indices = numpy.random.RandomState(iteration).randint(0, n_samples, size=n_samples)
             boost_weights = numpy.bincount(_indices, minlength=n_samples) * ada_weight
@@ -53,7 +61,7 @@ class InfiniteBoosting(BaseEstimator, ClassifierMixin):
         return self
 
     def staged_decision_function(self, X):
-        """yield predictions after each tree. Raw values, not probabilities"""
+        """ Yield predictions after each tree. Raw values, not probabilities """
         pred = numpy.zeros(X.shape[0])
         for iteration, tree in enumerate(self.estimators):
             pred = self.encounter_contribution(

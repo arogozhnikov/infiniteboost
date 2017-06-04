@@ -202,7 +202,7 @@ class InfiniteBoosting(ResearchGradientBoostingBase):
         Infinite boosting with fixed capacity value during iterations. 
         Details see in the paper in the same repository.
          
-        :param int capacity: capacity of infinite boosting, normalization constant of the ensemble 
+        :param float capacity: capacity of infinite boosting, normalization constant of the ensemble 
         :param kwargs: other parameters, see parent class ResearchGradientBoostingBase 
         """
         self.capacity = capacity
