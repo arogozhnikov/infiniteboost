@@ -1,3 +1,5 @@
+<img src='https://github.com/arogozhnikov/infiniteboost/blob/master/infiniteboost.png' width=200 align=right />
+
 # InfiniteBoost
 
 Code for a paper  <br />
@@ -8,8 +10,8 @@ InfiniteBoost: building infinite ensembles with gradient descent.
 
 InfiniteBoost is an approach to building ensembles which combines best sides of random forest and gradient boosting. 
 
-Trees in the ensemble encounter mistakes done by previous trees, but due to modified scheme of encountering contributions
-the ensemble converges to the limit, thus avoiding overfitting, just as random forest.
+Trees in the ensemble encounter mistakes done by previous trees (as in gradient boosting), but due to modified scheme of encountering contributions
+the ensemble converges to the limit, thus avoiding overfitting (just as random forest).
 
 ## Reproducing research
 
