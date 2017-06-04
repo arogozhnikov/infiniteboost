@@ -14,12 +14,12 @@ the ensemble converges to the limit, thus avoiding overfitting, just as random f
 ## Reproducing research
 
 Research is performed in jupyter notebooks 
-([why Jupyter notebooks are awesome](http://arogozhnikov.github.io/2016/09/10/jupyter-features.html)).
+(if you're not familiar, read [why Jupyter notebooks are awesome](http://arogozhnikov.github.io/2016/09/10/jupyter-features.html)).
 
 You can use docker image `arogozhnikov/pmle:0.01` from docker hub. 
 Dockerfile is stored in this repository (ubuntu 16 + basic sklearn stuff).
 
-To run the environment:
+To run the environment (sudo is needed on linux):
 ```bash
 sudo docker run -it --rm -v /YourMountedDirectory:/notebooks -p 8890:8890 arogozhnikov/pmle:0.01
 ```
@@ -33,7 +33,7 @@ Self-written minimalistic implementation of trees as used for experiments agains
 Specific implementation was used to compare with random forest and based on the trees from scikit-learn package. 
 
 Code written in python 2, some critical functions in fortran, so you need `gfortran + openmp` installed 
-before installing the package.
+before installing the package (or simply use docker image).
 
 ```bash
 pip install numpy
