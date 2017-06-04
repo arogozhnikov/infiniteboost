@@ -69,7 +69,7 @@ where the ensemble prediction $F(x)$ accumulates contribution of the trees $ F(x
 
 \begin{algorithm}[!h]
   \caption{Gradient boosting}\label{alg:gb}
-  {\bf Input}: training set $\{x_i, y_i\}_{i=1}^n$; a differentiable loss function $L(y, F(x))$; the number of boosting iterations $M$; a shrinkage $\eta$.
+  {\bf Input}: training set $\{x_i, y_i\}_{i=1}^n$; a differentiable loss function $L(y, F(x))$; the number of boosting iterations $M$; a shrinkage~$\eta$.
 
   {\bf Algorithm} ($F(x)$ is output):
   \begin{algorithmic}
@@ -135,9 +135,9 @@ this property can be enforced e.g. by adding Gaussian noise to $z$ before buildi
   {\bf Remarks}:
   \begin{itemize}
     \item To avoid over-stepping in first iterations capacity $c$ is replaced with a value providing the contribution of a single tree not greater than one.
-    \item To avoid recomputing ensemble ($\varepsilon_m = \frac{\alpha_m}{\sum_{k=1}^m \alpha_k}$):
+    \item To avoid recomputing ensemble ($\eta_m = \frac{\alpha_m}{\sum_{k=1}^m \alpha_k}$):
       \begin{equation*}
-        F(x) \gets (1-\varepsilon_m)F(x) + \varepsilon_m \times c \times \text{tree}_m(x).
+        F(x) \gets (1-\eta_m)F(x) + \eta_m \times c \times \text{tree}_m(x).
       \end{equation*}
   \end{itemize}
 \end{algorithm}
@@ -148,17 +148,17 @@ It can be interpreted as a stochastic optimization of the following regularized 
 \end{equation*}
 while in stochastic gradient descent methods an update has the form
 \formula{
-    z \leftarrow z - \varepsilon_m \left(z + c \times \text{grad}_z \mathcal{L} \right) = \\
-    = (1 - \varepsilon_m) z - \varepsilon_m c \times \text{grad}_z \mathcal{L}.
+    z \leftarrow z - \eta_m \left(z + c \times \text{grad}_z \mathcal{L} \right) = \\
+    = (1 - \eta_m) z - \eta_m c \times \text{grad}_z \mathcal{L}.
 }
 The gradient step, as usually in gradient boosting, is replaced with building a tree modelling an anti-gradient.
 Then an ensemble prediction is updated similarly:
 \begin{equation*}
-    F(x) \leftarrow (1 - \varepsilon_m) F(x) + \varepsilon_m c \times \text{tree}_m(x).
+    F(x) \leftarrow (1 - \eta_m) F(x) + \eta_m c \times \text{tree}_m(x).
 \end{equation*}
-Different choices of $\varepsilon_m$ are possible and correspond to different weightings $\alpha_m$.
-For example, $\varepsilon_m = 1 / m$ correspond to uniform weighting $\alpha_m = 1$,
-while $\varepsilon_m = 2 / (m + 1)$ correspond to assigning higher weights for later trees $\alpha_m = m$.
+Different choices of $\eta_m$ are possible and correspond to different weightings $\alpha_m$.
+For example, $\eta_m = 1 / m$ correspond to uniform weighting $\alpha_m = 1$,
+while $\eta_m = 2 / (m + 1)$ correspond to assigning higher weights for later trees $\alpha_m = m$.
 In our experiments the second option is used, because it keeps the effective sample size of $\frac{3}{4}m$ (compatible with uniform weighting),
 but allows ensemble to adapt faster to new $z$ values:
 to obtain 99\% contribution of "new trees" to the ensemble one needs to enlarge size of the ensemble by a factor of 10,
@@ -170,7 +170,7 @@ whereas with uniform weighting the size should be enlarged by 100 times.
 \begin{theorem}
 InfiniteBoost converges almost surely to the solution of Equation (\ref{eq:stationary}),
 provided that $c \times \overline{T}(z)$ is a contraction mapping and
-$\varepsilon_m \sim \frac{1}{m}$.
+$\eta_m \sim \frac{1}{m}$.
 \end{theorem}
 
 The contraction requirement may hold only for sufficiently small capacities $c$,
@@ -178,8 +178,8 @@ also it implies there is one and only one solution $z^{*}$ of Equation (\ref{eq:
 Theorem follows from an inequality
 \formula{
     \mathbb{E} || z_{m+1} - z^{*} ||^2 \leq \\
-    \leq \left(1 - \text{const}_1 \, \varepsilon_m  \right)^2 \mathbb{E} || z_m - z^{*} ||^2
-    + \text{const}_2 \, \varepsilon^2_m
+    \leq \left(1 - \text{const}_1 \, \eta_m  \right)^2 \mathbb{E} || z_m - z^{*} ||^2
+    + \text{const}_2 \, \eta^2_m
 }
 that holds for some positive constants $\text{const}_1$, $\text{const}_2$,
 consequently, $\lim_{m \to +\infty} \mathbb{E} || z_{m} - z^{*} ||^2 = 0$.
@@ -295,7 +295,7 @@ With comparison to gradient boosting, this algorithm has no shrinkage hyperparam
 However, the construction of large ensembles is not feasible in this algorithm from the computational point.
 On each learning iteration it is needed to prepare new target by predicting the training set with a random subset of already constructed trees.
 This leads to the quadratic (not linear as for gradient boosting) dependence between training time and the number of built trees.\footnote{
-There is a mode of DART algorithm, called $\varepsilon$-algorithm, with dropping only one tree from the ensemble on each iteration.
+There is a mode of DART algorithm, called $\eta$-algorithm, with dropping only one tree from the ensemble on each iteration.
 It is linear in time w.r.t. the number of trees in the ensemble.}
 Also, the algorithm does not converge to some point for arbitrarily large number of trees because the contribution of newly-built tree does not tend to zero, which causes over-fitting.
 % обучение нелинейно зависит от числа построенных деревьем (квадратично)
