@@ -25,13 +25,13 @@ class InfiniteBoosting(BaseEstimator, ClassifierMixin):
 
     def encounter_contribution(self, current_sum, contribution, iteration):
         """ Add tree contribution to the ensemble """
-        epsilon = 2. / (iteration + 2)
-        return current_sum * (1 - epsilon) + contribution * epsilon
+        eta = 2. / (iteration + 2)
+        return current_sum * (1 - eta) + contribution * eta
 
     def compute_capacity(self, iteration):
         """ shrinking at early iterations to prevent overstepping """
-        epsilon = 2. / (iteration + 2)
-        return min(1 / epsilon, self.capacity)
+        eta = 2. / (iteration + 2)
+        return min(1 / eta, self.capacity)
 
     def fit(self, X, y):
         """ train a model """
