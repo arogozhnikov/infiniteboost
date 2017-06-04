@@ -51,27 +51,42 @@ build_decision = build_decision_numpy
 
 
 class ResearchDecisionTree(object):
-    """ 
-    Quite simple and fast regression decision tree that minimizes MSE.
-    Needed when training many trees on large datasets.
-    Uses datasets in the binned form both for the sake of speed and 
-    minimizing space consumption. 
-    To get binned form use BinTransformer (see below). 
-    """
     _n_thresholds = 128
 
     def __init__(self, max_depth=3, max_features=1., random_state=42, n_threads=1):
+        """
+        Quite simple and fast regression decision tree that minimizes MSE.
+        Needed when training many trees on large datasets.
+        Uses datasets in the binned form both for the sake of speed and 
+        minimizing space consumption. 
+        To get binned form use BinTransformer (see below). 
+        
+        Tree always has 2^depth leaves (for computational purposes).
+    
+        :param int max_depth: maximal depth of tree
+        :param float max_features: percentage of feature sampling 
+        :param random_state: random state for reproducibility
+        :param int n_threads: number of threads 
+        """
         self.max_depth = max_depth
         self.max_features = max_features
         self.random_state = random_state
         self.n_threads = n_threads
 
     def checkX(self, X):
-        assert isinstance(X, numpy.ndarray), type(numpy.ndarray)
-        assert X.dtype == 'uint8', X.dtype
-        assert numpy.isfortran(X)
+        """Check the input data: size and type"""
+        assert isinstance(X, numpy.ndarray), "Type error: {} should be numpy.ndarray".format(type(X))
+        assert X.dtype == 'uint8', "Type error: {} is not equal to uint8".format(X.dtype)
+        assert numpy.isfortran(X), "Type error: Could not use the data in fortran"
 
     def fit(self, X, y, sample_weight, check_input=True):
+        """
+        Train a model
+        
+        :param X: important! X should be already preprocessed with BinTransform! That is, uint8 and fortran-ordered 
+        :param y: target values, 0 and 1 for classification, 
+        :param sample_weight: real-valued weights for observations 
+        """
         if check_input:
             self.checkX(X)
             assert len(X) == len(y) == len(sample_weight)
@@ -84,8 +99,7 @@ class ResearchDecisionTree(object):
 
         rows = numpy.arange(len(current_leaves))
         for level in range(self.max_depth):
-            selected_features = self.random_state.choice(
-                range(X.shape[1]), size=_max_features, replace=False)
+            selected_features = self.random_state.choice(range(X.shape[1]), size=_max_features, replace=False)
             selected_features = numpy.sort(selected_features)
             n_current_leaves = 2 ** level
 
@@ -100,8 +114,6 @@ class ResearchDecisionTree(object):
 
             assert all_improvements.shape == (n_current_leaves, len(selected_features), self._n_thresholds)
 
-            # assert numpy.in1d(current_leaves, 2 ** level + numpy.arange(2 ** level)).all()
-
             for leaf in numpy.arange(2 ** level):
                 leaf_code = 2 ** level + leaf
                 feature_id, threshold = numpy.unravel_index(
@@ -115,7 +127,7 @@ class ResearchDecisionTree(object):
         return self
 
     def transform(self, X):
-        """compute number of leaf in a tree"""
+        """Compute number of leaf in a tree"""
         self.checkX(X)
         current_leaves = numpy.ones(len(X), dtype='int32')
         rows = numpy.arange(len(current_leaves))
@@ -134,12 +146,14 @@ class BinTransformer(BaseEstimator, TransformerMixin):
         """
         Bin transformer transforms all features (which are expected to be numerical)
         to small integers.
+        
         :param int max_bins: maximal number of bins along each axis.
         """
         self.max_bins = max_bins
 
     def fit(self, X, y=None, sample_weight=None):
-        """Prepare transformation rule, compute bin edges.
+        """
+        Prepare transformation rule, compute bin edges.
         
         :param X: array-like with data
         :param y: labels, ignored
@@ -161,6 +175,8 @@ class BinTransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
+        Transform all features to small integers (binarization)
+        
         :param X: array-like with data
         :return: numpy.array with transformed features, dtype is 'uint8' for space efficiency.
         """
