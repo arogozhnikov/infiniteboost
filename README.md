@@ -10,8 +10,13 @@ InfiniteBoost: building infinite ensembles with gradient descent.
 
 InfiniteBoost is an approach to building ensembles which combines best sides of random forest and gradient boosting. 
 
-Trees in the ensemble encounter mistakes done by previous trees (as in gradient boosting), but due to modified scheme of encountering contributions
+Trees in the ensemble encounter mistakes done by previous trees (as in gradient boosting), 
+but due to modified scheme of encountering contributions
 the ensemble converges to the limit, thus avoiding overfitting (just as random forest).
+
+<img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/rocauc_higgs.png' width=400 /><img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/forest_longrun_real-sim.png' width=400 />
+
+More plots of comparison in research notebooks and in research/plots directory.
 
 ## Reproducing research
 
@@ -42,3 +47,5 @@ pip install numpy
 pip install .
 nosetests tests
 ```
+
+You can use implementation of trees from the package for your experiments, in this case please cite InfiniteBost paper.
