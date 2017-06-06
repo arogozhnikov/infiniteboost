@@ -52,4 +52,4 @@ You can use implementation of trees from the package for your experiments, in th
 
 ## Planned
 
-Implementation of InfiniteBoost for other boosting packages.
+Implementation of InfiniteBoost for other boosting packages (help is welcome).
