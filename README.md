@@ -47,7 +47,8 @@ before installing the package (or simply use docker image).
 ```bash
 pip install numpy
 pip install .
-nosetests tests
+# testing (optional)
+cd tests && nosetests .
 ```
 
 You can use implementation of trees from the package for your experiments, in this case please cite InfiniteBost paper.
