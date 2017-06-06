@@ -14,7 +14,9 @@ Trees in the ensemble encounter mistakes done by previous trees (as in gradient 
 but due to modified scheme of encountering contributions
 the ensemble converges to the limit, thus avoiding overfitting (just as random forest).
 
-<img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/rocauc_higgs.png' width=400 /><img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/forest_longrun_real-sim.png' width=400 />
+<img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/rocauc_higgs.png' width=400 /><img src='https://github.com/arogozhnikov/infiniteboost/blob/master/research/plots/forest_longrun_real-sim.png' width=400 /> 
+
+Left: InfiniteBoost with automated search of capacity vs gradient boosting with different learning rates (shrinkages), right: random forest vs InfiniteBoost with small capacities.
 
 More plots of comparison in research notebooks and in research/plots directory.
 
