@@ -3,8 +3,8 @@
 # InfiniteBoost
 
 Code for a paper  <br />
-InfiniteBoost: building infinite ensembles with gradient descent ([arxiv:1706.01109](https://arxiv.org/abs/1706.01109)). <br />
-[A. Rogozhnikov](https://github.com/arogozhnikov), [T. Likhomanenko](github.com/tlikhomanenko)
+InfiniteBoost: building infinite ensembles with gradient descent ([arXiv:1706.01109](https://arxiv.org/abs/1706.01109)). <br />
+[A. Rogozhnikov](https://github.com/arogozhnikov), [T. Likhomanenko](https://github.com/tlikhomanenko)
 
 ## Description
 
@@ -22,17 +22,17 @@ More plots of comparison in research notebooks and in research/plots directory.
 
 ## Reproducing research
 
-Research is performed in jupyter notebooks 
+Research is performed in [jupyter notebooks](http://jupyter.org/)
 (if you're not familiar, read [why Jupyter notebooks are awesome](http://arogozhnikov.github.io/2016/09/10/jupyter-features.html)).
 
-You can use docker image `arogozhnikov/pmle:0.01` from docker hub. 
+You can use the [docker image](https://docs.docker.com/engine/reference/commandline/images/) `arogozhnikov/pmle:0.01` from [docker hub](https://hub.docker.com/). 
 Dockerfile is stored in this repository (ubuntu 16 + basic [sklearn](https://github.com/scikit-learn/scikit-learn) stuff).
 
-To run the environment (sudo is needed on linux):
+To run the environment (sudo is needed on Linux):
 ```bash
 sudo docker run -it --rm -v /YourMountedDirectory:/notebooks -p 8890:8890 arogozhnikov/pmle:0.01
 ```
-(and open `localhost:8890` in the browser).
+(and open [`localhost:8890`](http://localhost:8890/) in your browser).
 
 
 ## InfiniteBoost package
