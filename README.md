@@ -41,7 +41,7 @@ Self-written minimalistic implementation of trees as used for experiments agains
 
 Specific implementation was used to compare with random forest and based on the trees from scikit-learn package. 
 
-Code written in python 2, some critical functions in fortran, so you need `gfortran + openmp` installed 
+Code written in python 2 (expected to work with python 3, but not tested), some critical functions in fortran, so you need `gfortran + openmp` installed 
 before installing the package (or simply use docker image).
 
 ```bash
@@ -51,7 +51,7 @@ pip install .
 cd tests && nosetests .
 ```
 
-You can use implementation of trees from the package for your experiments, in this case please cite InfiniteBost paper.
+You can use implementation of trees from the package for your experiments, in this case please cite InfiniteBoost paper.
 
 ## Planned
 
