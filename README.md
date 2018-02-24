@@ -52,7 +52,3 @@ cd tests && nosetests .
 ```
 
 You can use implementation of trees from the package for your experiments, in this case please cite InfiniteBoost paper.
-
-## Planned
-
-Implementation of InfiniteBoost for other boosting packages (help is welcome).
