@@ -1,5 +1,5 @@
 \begin{abstract}
-    Ensemble methods have demonstrated high accuracy for a variety of problems in different areas of machine learning.
+    Ensemble methods have demonstrated high accuracy for a~variety of problems in different areas of machine learning.
     Two notable ensemble methods widely used in practice are gradient boosting and random forests.
     In this paper we present InfiniteBoost --- a novel algorithm, which combines important properties of these two approaches. 
     The algorithm constructs an ensemble of trees for which the following two properties hold: 
@@ -18,32 +18,31 @@ Wide applicability of ensembles is confirmed by data challenges: 60\% of winning
 In ensemble methods multiple individual predictors are trained for the same problem and after that are combined in some manner.
 Predictors in the ensemble can be constructed independently, like in bagging~\cite{key-bagging} and, in particular, random forests~\cite{key-random-forest}, or depending upon the performance of the previous models, like in gradient boosting~\cite{key-gb}.
 
-Random forests suggested by L. Breiman~\cite{key-random-forest} are a combination of tree predictors such that each tree in the ensemble is constructed using the random subset of features and bagging~\cite{key-bagging} providing bootstrap replicas of the training set.
-Tree predictors are aggregated by averaging.
-It can be shown that the generalization error for forests converges a.s. to a limit as the number of trees in the forest becomes large.
-As a result, one can include arbitrarily many trees in the ensemble without decreasing its performance on the unseen data.
+Random forests suggested by L. Breiman~\cite{key-random-forest} are a combination of tree predictors such that each tree in the ensemble is constructed uses a random subset of features and a bootstrap replica of the training set provided by bagging~\cite{key-bagging}.
+Predictions of trees are aggregated by simple averaging.
+It can be shown that generalization error for forests converges a.s. to a limit as the number of trees in the forest tends to infinity.
+As a result, one can include arbitrarily many trees in the ensemble without decreasing its performance on unseen data.
 Also L. Breiman shows that predictors in the ensemble should be accurate but uncorrelated to achieve a better quality than individual predictors. 
-In practice accuracy of predictors is provided by employing deep trees and low correlation is achieved by bagging and random features subsampling.
+In practice accuracy of predictors is provided by employing deep trees, whereas low correlation is achieved by bagging and random features subsampling.
 
 In contrast to random forests, a general gradient descent boosting paradigm~\cite{key-gb,key-sgb}, developed by J. Friedman, 
-an ensemble method of boosted regression trees.
-Boosting greedy approximates a target function with gradient descent method in the space of functions. 
+introduces consecutive ensemble building by greedily approximating a target function with gradient descent in the space of functions. 
 On each iteration of boosting a new tree is constructed to approximate a gradient of the loss function, % with respect to the decision function.
-which provides accounting the performance and mistakes of previously constructed trees in the ensemble.
+which provides accounting for the performance and mistakes of previously constructed trees in the ensemble.
 % Next trees in the ensemble focus on training samples poorly classified or predicted by previous trees
 In real world applications gradient boosting models often have to contain thousands of trees to provide the best possible quality.
 However, building arbitrarily large boosting models drives to decrease of quality on the unseen data~\cite{key-brownboost, key-dart}, an effect known as over-fitting.
 
 To fight mentioned disadvantages of random forest and gradient boosting we present a novel algorithm, called InfiniteBoost, the goal of which is to combine the best properties of both: allow for construction of an infinite (arbitrarily large) ensemble and at the same time account for the mistakes of previously constructed trees in the ensemble using a gradient descent method.
 
-The remainder of the paper is organized as follows: in Section~2 we explain the motivation behind InfiniteBoost; in Section~3 we describe InfiniteBoost algorithm and prove the convergence theorem.
+The rest of this paper is organized as follows: in Section~2 we explain the motivation behind InfiniteBoost; in Section~3 we describe InfiniteBoost algorithm and prove the convergence theorem.
 Comparison of the proposed algorithm with gradient boosting and random forests is given in Section~4: experimental results are listed for regression, classification, and ranking problems. 
 Finally, we provide an overview of other existing boosting-bagging hybrid algorithms (term introduced by J. Friedman~\cite{key-sgb}) in Section~5.
 
 
 \section{Motivation}
 
-For simplicity we consider the ensembles over decision trees, while proposed framework naturally generalizes to ensembling of arbitrary models.
+For simplicity we consider specifically ensembles over decision trees, while proposed framework naturally generalizes to ensembling of arbitrary models.
 Random forests construct trees in the ensemble independently using randomness in feature selection and bagging to provide own training set for each predictor.
 This independence makes it possible to build infinite ensembles: quality on the unseen data converges to some constant as the number of trees in the ensemble becomes large.
 
@@ -55,7 +54,7 @@ Thus, for gradient boosting an arbitrarily large number of predictors in an ense
 % кажется, это предложение не нужно (да и я не слишком с ним согласен)
 % This issue is interpreted as overspecialization in~\cite{key-dart} and described as the following: wherein trees added at later iterations tend to impact the prediction of only a few samples, and make negligible contribution towards the remaining samples.
 
-In order to avoid over-fitting a shrinkage parameter is introduced to the boosting procedure: a new tree is added to the ensemble with a coefficient $\eta$, called shrinkage (or learning rate).
+To reduce over-fitting effect and allow construction of larger ensembles, a shrinkage parameter is introduced to the boosting procedure: a new tree is added to the ensemble with a coefficient $\eta$, called shrinkage (or learning rate).
 Shrinkage is an important hyperparameter of gradient boosting which requires careful tuning in applications.
 
 InfiniteBoost is an algorithm which aims to build an infinite ensemble (without over-fitting effect with increasing the number of predictors) such that each new predictor incorporates the errors made by the previous predictors in the ensemble (boosting procedure).
@@ -92,9 +91,8 @@ and scaled by an additional constant $c$, called ensemble capacity (or simply ca
 $ F(x) = c \times \dfrac{\sum_m \alpha_m \text{tree}_m(x)}{ \sum_m \alpha_m } $.
 The contribution of each individual tree in this model converges to zero.
 %FIXME
-The model of interest should after sufficiently large amount of iterations converge to a stationary process
-(we expect the process of tree building to be randomized, which is crucial in building powerful ensembles of trees),
-and the distribution of newly-built trees should coincide with the distribution of trees already in the ensemble (consequence of a) property)
+To satisfy property a) an ensembling model should after sufficiently large amount of iterations converge to a stationary process,
+and the distribution\footnote{We expect the process of tree building to be randomized, which is crucial in building powerful ensembles of trees} of newly-built trees should coincide with the distribution of trees already in the ensemble property)
 \begin{equation*}
   F(x) = c \times \mathbb{E}_{\text{trees at }F(x)} \text{tree}(x)
 \end{equation*}
@@ -152,7 +150,7 @@ with stochastic gradient descent update rule:
     z \leftarrow z - \eta_m \left(z + c \times \text{grad}_z \mathcal{L} \right) = \\
     = (1 - \eta_m) z - \eta_m c \times \text{grad}_z \mathcal{L}.
 }
-As in the usual gradient boosting, a gradient step is replaced with building a tree modelling a negative gradient.
+As in usual gradient boosting, a gradient step is replaced with building a tree modelling a negative gradient.
 Then an ensemble prediction is updated similarly:
 \begin{equation*}
     F(x) \leftarrow (1 - \eta_m) F(x) + \eta_m c \times \text{tree}_m(x).
@@ -192,14 +190,13 @@ consequently, $\lim_{m \to +\infty} \mathbb{E} || z_{m} - z^{*} ||^2 = 0$.
 \subsection{Adapting ensemble capacity during traning}
 
 Capacity $c$ of an ensemble can be changed in the process of building, allowing next trees to find another optimal point.
-Since the loss is differentiable with respect to capacity $c$,
-we present a variant of InfiniteBoost (Algorithm \ref{alg:infiniteboost_adaptive}) which adapts $c$ using holdout.
+Since the loss is differentiable with respect to capacity $c$, we present a variant of InfiniteBoost (Algorithm \ref{alg:infiniteboost_adaptive}) which adapts $c$ using holdout.
 In experiments, 5\% of the training set is used as a holdout to tune capacity.
 This way, one may skip the process of tuning capacity (or similar parameter shrinkage of gradient boosting).
-After properly selecting capacity, holdout can be added to the training set, but this was not done in our experiments.
+After properly selecting capacity, holdout can be added to the training set to improve results, but this was not done in our experiments.
 
 \begin{algorithm}[!h]
-  \caption{Infinite Boosting with adaptive capacity (InifiniteBoost)}\label{alg:infiniteboost_adaptive}
+  \caption{InifiniteBoost with adaptive capacity}\label{alg:infiniteboost_adaptive}
   {\bf Input}: training set $\{x_i, y_i\}_{i=1}^n$; a differentiable loss function $L(y, F(x))$; the number of boosting iterations $M$.
 
   {\bf Algorithm} ($F(x)$ is output):
@@ -220,8 +217,9 @@ After properly selecting capacity, holdout can be added to the training set, but
 We have evaluated InfiniteBoost for three different tasks: classification, regression, and ranking. 
 %FIXME: repeated phrase abuse
 Large scale, publicly available datasets are used in comparison. 
-In our evaluation, we compare InfiniteBoost with two extreme cases: random forests and gradient boosting with different shrinkage values.
-The source code with all experiments is available on the github: \url{https://github.com/arogozhnikov/infiniteboost}.
+In our evaluation, we compare InfiniteBoost with two extreme cases: random forests and gradient boosting with different shrinkage values.\footnote{
+  Reference implementation, code of all the experiments, and additional plots are available on the github: \url{https://github.com/arogozhnikov/infiniteboost}.
+}
 
 \insertplotsgbarxiv
 \insertplotsforestarxiv
@@ -249,8 +247,9 @@ InfiniteBoost with small capacity almost does not encounter mistakes done at the
 thus, behaves similarly to a random forest.
 
 % TODO find references why those are good datasets?
-In benchmarks we use an implementation of random forest from scikit-learn~\cite{key-sklearn} with default settings (without limiting depth) and datasets (see Table~\ref{tab:rf-data}) with known good performance of random forest.
-To have side-by-side comparison InfiniteBoost uses deep trees with the same parameters, just as random forest.
+In comparison we use an implementation of random forest from scikit-learn~\cite{key-sklearn}. 
+Datasets (see Table~\ref{tab:rf-data}) with known superior performance of random forest were taken.
+To have side-by-side comparison InfiniteBoost uses deep trees with the same parameters as random forest.
 Such deep trees over-fit to the training data, therefore, they are usually considered to be inappropriate for boosting.
 In the experiments InfiniteBoost is tested with different fixed capacity values and it is observed that adding a bit of boosting behavior to random forest by setting a small capacity improves the model for 2 of 3 datasets (see Table~\ref{tab:rf-auc}).
 Proposed algorithm is capable of using the mistakes made by previous trees on out-of-bag samples, which makes boosting possible.
@@ -300,7 +299,7 @@ With comparison to gradient boosting, this algorithm has no shrinkage hyperparam
 However, construction of large ensembles is not feasible in this algorithm from the computational point,
 since on each learning iteration it is needed to prepare a new target by predicting the training set with a random subset of already constructed trees.
 This leads to the quadratic (not linear as for gradient boosting) dependence between training time and the number of built trees.\footnote{
-There is a mode of DART algorithm, called $\eta$-algorithm, with dropping only one tree from the ensemble on each iteration.
+There is a mode of DART algorithm, called $\epsilon$-algorithm, with dropping only one tree from the ensemble on each iteration.
 It is linear in time w.r.t. the number of trees in the ensemble.}
 Also, the algorithm does not converge to some point for arbitrarily large number of trees because the contribution of newly-built tree does not tend to zero, which causes over-fitting.
 
